@@ -38,14 +38,12 @@ public class MayTheTweet {
             int monthNum = cal.get(Calendar.MONTH);
             String month = getMonth(monthNum);
 
-//        String newMessageToTweet = "Encore un test de tweet automatique, on est le "
-//                + getNumber(dayOfMonth) + " du mois de " + month;
             String newMessageToTweet = getMonth(monthNum) + " the " + getNumber(dayOfMonth) + " be with you.";
 
-            System.out.println("Message: " + newMessageToTweet);
+            System.out.println("Tweeting: " + newMessageToTweet);
 
+            // Send the tweet.
             twitter.updateStatus(newMessageToTweet);
-
         } catch (TwitterException te) {
             te.printStackTrace();
         }
@@ -56,10 +54,23 @@ public class MayTheTweet {
      * added at the end.
      *
      * @param day
-     * @return
+     * @return the day and suffix (st, nd, rd, th)
      */
     private static String getNumber(int day) {
-        return day + "th";
+
+        String result;
+        result = switch (day) {
+            case 1,21,31 ->
+                day + "st";
+            case 2,22 ->
+                day + "nd";
+            case 3,23 ->
+                day + "rd";
+            default ->
+                day + "th";
+        };
+
+        return result;
     }
 
     private static String getMonth(int monthNum) {
