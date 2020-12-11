@@ -1,4 +1,4 @@
-package com.maythetweetbewithyou;
+package twitterBot;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,6 +31,7 @@ public class ConnectionPropertiesReader {
                 String split[] = line.split("=");
                 String key = split[0];
                 String value = split[1];
+                System.out.println("New Property: " + key + ", value " + value);
                 key = removeLeadingTrailingSpaces(key);
                 value = removeLeadingTrailingSpaces(value);
                 hashmap.put(key, value);
@@ -47,6 +48,7 @@ public class ConnectionPropertiesReader {
         String result = hashmap.get(key);
         if (result == null) {
             System.out.println("Error in retrieving value for key <" + key + ">");
+            printValues();
         }
 
         return result;
