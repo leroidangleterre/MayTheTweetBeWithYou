@@ -41,8 +41,7 @@ class GenericBotTask extends TimerTask {
         int hourOfDay = cal.get(Calendar.HOUR_OF_DAY);
         int minuteOfHour = cal.get(Calendar.MINUTE);
 
-        String newMessageToTweet = getMonth(monthNum) + " the " + getNumber(dayOfMonth)
-                + " be with you.";
+        String newMessageToTweet = generateDailyMessage(monthNum, dayOfMonth);
 
         StatusUpdate update = new StatusUpdate(newMessageToTweet);
         addImageIfNeeded(update, dayOfMonth, monthNum);
@@ -65,7 +64,6 @@ class GenericBotTask extends TimerTask {
             System.out.println("Could not tweet: " + newMessageToTweet);
             Logger.getLogger(GenericBotTask.class.getName()).log(Level.SEVERE, null, ex);
         }
-
         currentTweetIndex++;
     }
 
@@ -161,5 +159,66 @@ class GenericBotTask extends TimerTask {
         } catch (IOException e) {
             System.out.println("Error when reading file.");
         }
+    }
+
+    /**
+     * Generate the message displayed in the tweet. When a message in the
+     * "special messages" file corresponds to this date, it is displayed instead
+     * of the generic message.
+     *
+     * @param monthNum
+     * @param dayOfMonth
+     * @return
+     */
+    private String generateDailyMessage(int monthNum, int dayOfMonth) {
+
+        // Default value if nothing special is specified in the file.
+        String message = getMonth(monthNum) + " the " + getNumber(dayOfMonth) + " be with you.";
+
+        try {
+            File specialMessagesFile = new File("Resources/specialTweetMessages.txt");
+            BufferedReader reader = new BufferedReader(new FileReader(specialMessagesFile));
+            String text;
+            while ((text = reader.readLine()) != null) {
+                if (textMatchesDate(text, dayOfMonth, monthNum)) {
+                    try {
+                        message = text.split("\t")[1];
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        System.out.println("Error while splitting text " + text);
+                    }
+                }
+            }
+
+        } catch (FileNotFoundException e) {
+            System.out.println("Messages file not found, generating default message instead.");
+        } catch (IOException e) {
+            System.out.println("Error while reading default messages.");
+        }
+        message = addHashtags(message);
+        return message;
+    }
+
+    /**
+     * Check id the line starts with the given day and month, respecting the
+     * format "mm-dd\t"
+     *
+     * @param text
+     * @param requestedDay
+     * @param requestedMonth
+     * @return
+     */
+    private boolean textMatchesDate(String text, int requestedDay, int requestedMonth) {
+
+        String day = (requestedDay < 10 ? "0" : "") + requestedDay;
+        requestedMonth = requestedMonth + 1;
+        String month = requestedMonth < 10 ? "0" + requestedMonth : "" + requestedMonth;
+        return text.startsWith(day + "-" + month);
+    }
+
+    private String addHashtags(String message) {
+
+        message += "\n\n#TheMandalorian\n#mandalorian\n#starwars";
+
+        return message;
     }
 }
